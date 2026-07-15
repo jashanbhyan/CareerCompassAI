@@ -1,41 +1,21 @@
 import requests
-import pandas as pd
-import os
+from src.utils.config import API_URL, HEADERS
 
-print("Fetching data from RemoteOK API...")
 
-url = "https://remoteok.com/api"
+def fetch_jobs():
+    """
+    Fetch job data from the RemoteOK API.
+    Returns a Python list.
+    """
 
-headers = {
-    "User-Agent": "CareerCompassAI"
-}
+    response = requests.get(API_URL, headers=HEADERS)
 
-response = requests.get(url, headers=headers)
+    response.raise_for_status()
 
-if response.status_code == 200:
-    print("API Connected Successfully!")
+    return response.json()
 
-    data = response.json()
 
-    # The first element contains metadata, so skip it
-    jobs = data[1:]
+if __name__ == "__main__":
+    jobs = fetch_jobs()
 
-    # Convert JSON to DataFrame
-    df = pd.DataFrame(jobs)
-
-    # Create data/raw folder if it doesn't exist
-    os.makedirs("data/raw", exist_ok=True)
-
-    # Save CSV
-    df.to_csv("data/raw/jobs.csv", index=False)
-
-    print(f"Total Jobs Collected: {len(df)}")
-    print("Dataset saved to data/raw/jobs.csv")
-
-    # Display first 5 rows
-    print("\nFirst 5 Records:")
-    print(df.head())
-
-else:
-    print("Failed to connect.")
-    print("Status Code:", response.status_code)
+    print(f"Fetched {len(jobs)-1} jobs successfully.")
